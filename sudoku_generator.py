@@ -1,5 +1,6 @@
 import math
 import random
+from copy import deepcopy
 
 """
 This was adapted from a GeeksforGeeks article "Program for Sudoku Generator" by Aarti_Rathi and Ankur Trisal
@@ -33,6 +34,7 @@ class SudokuGenerator:
             self.board.append([])
             for num2 in range(row_length):
                 self.board[num1].append(0)
+        self.removed_board = self.board
 
     '''
     Returns a 2D python list of numbers which represents the board
@@ -42,6 +44,8 @@ class SudokuGenerator:
     def get_board(self):
         return self.board
 
+    def get_removed_board(self):
+        return self.removed_board
     '''
     Displays the board to the console
     This is not strictly required, but it may be useful for debugging purposes
@@ -223,10 +227,12 @@ class SudokuGenerator:
         remove = self.removed_cells
         while remove:
             col = random.randint(0, 8)
-            row = random.randint(0,8)
+            row = random.randint(0, 8)
             if self.board[row][col] != 0:
                 self.board[row][col] = 0
                 remove -= 1
+
+
 
 
 '''
@@ -249,8 +255,10 @@ Return: list[list] (a 2D Python list to represent the board)
 def generate_sudoku(size, removed):
     sudoku = SudokuGenerator(size, removed)
     sudoku.fill_values()
-    board = sudoku.get_board()
+    removed_board = sudoku.get_board()
+    board = deepcopy(removed_board)
     sudoku.remove_cells()
-    board = sudoku.get_board()
-    return board
+    return [board, removed_board]
 
+
+generate_sudoku(9, 30)

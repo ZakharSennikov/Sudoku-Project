@@ -83,8 +83,10 @@ def draw_number(num, board, removed_board, row, col):
 
 def main():
     # initialize board
-    board = generate_sudoku(9, 40)
+    board, removed_board = generate_sudoku(9, 40)
     while True:
+        if board == removed_board:
+            break
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -102,6 +104,7 @@ def main():
         #screen.blit(text_background, (237, 190))
         #screen.blit(text_surface, (250, 200))
         pygame.display.update()
+    print("congrats.")
 
 
 if __name__ == "__main__":
