@@ -74,12 +74,10 @@ def draw_guess(num, location):
     number_rect = number_guess.get_rect(center=location)
     screen.blit(number_guess, number_rect)
 
-
 def draw_number(num, board, removed_board, row, col):
     number = number_font.render(str(num), True, NUMBER_COLOR)
     number_rect = number.get_rect(center=(25 + 50 * col, 30 + 50 * row))
     screen.blit(number, number_rect)
-
 
 def main():
     # initialize board
@@ -96,7 +94,7 @@ def main():
                 row = y // 50
                 col = x // 50
                 if board[row][col] == 0:
-                    draw_number(5, board, board, row, col)
+                    draw_number(6, board, board, row, col)
 
         draw_grid()
         draw_board(board)
