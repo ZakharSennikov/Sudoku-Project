@@ -94,7 +94,7 @@ def main():
                 row = y // 50
                 col = x // 50
                 if board[row][col] == 0:
-                    draw_number(5, board, board, row, col)
+                    draw_number(6, board, board, row, col)
 
         draw_grid()
         draw_board(board)
