@@ -138,8 +138,8 @@ def start_screen():
         pygame.display.update()
 
 
-def end_screen():
-    pass
+def end_screen(answer_key_board, final_board):
+    screen.blit(background, (0, 0))
 
 
 def change_number(board, num, row, col):
@@ -240,7 +240,23 @@ def main():
                         if event.key == pygame.K_9:
                             num = 9
                             change_number(guess_board, num, row, col)
-
+                        '''
+                        if event.key == pygame.K_DOWN:
+                            row += 1
+                        if event.key == pygame.K_UP:
+                            row -= 1
+                        if event.key == pygame.K_LEFT:
+                            col -= 1
+                        if event.key == pygame.K_RIGHT:
+                            col += 1
+                        '''
+            end_game = True
+            for line in removed_board:
+                for digit in line:
+                    if digit == 0:
+                        end_game = False
+            if end_game:
+                end_screen(board, removed_board)
 
 
 if __name__ == "__main__":
