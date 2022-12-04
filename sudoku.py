@@ -19,6 +19,8 @@ title_font = pygame.font.Font(None, TITLE_SIZE)
 number_font = pygame.font.Font(None, NUMBER_SIZE)
 # text
 title_surface = title_font.render("Sudoku", True, TITLE_COLOR)
+win_surface = title_font.render("Game Won! :)", True, TITLE_COLOR)
+lose_surface = title_font.render("Game Lost! :(", True, TITLE_COLOR)
 button_background = pygame.Surface((BUTTON_WIDTH, BUTTON_HEIGHT))
 button_background.fill(BUTTON_COLOR)
 
@@ -120,7 +122,7 @@ def start_screen():
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if easy_button_rect.collidepoint(event.pos):
-                    return 30
+                    return 1
                 elif medium_button_rect.collidepoint(event.pos):
                     return 40
                 elif hard_button_rect.collidepoint(event.pos):
@@ -140,6 +142,49 @@ def start_screen():
 
 def end_screen(answer_key_board, final_board):
     screen.blit(background, (0, 0))
+    # creates before replacement
+    lose_rect = lose_surface.get_rect(center=(WIDTH // 2, HEIGHT // 5))
+    restart_button = font.render("RESTART", True, BUTTON_TEXT_COLOR)
+    restart_button_surface = pygame.Surface((restart_button.get_size()[0] + 20, restart_button.get_size()[1] + 20))
+    restart_button_surface.fill(BUTTON_COLOR)
+    restart_button_rect = restart_button.get_rect(center=(0, 0))
+
+    if answer_key_board == final_board:
+        # winner Screen setup
+        winner_rect = win_surface.get_rect(center=(WIDTH // 2, HEIGHT // 5))
+        exit_button = font.render("EXIT", True, BUTTON_TEXT_COLOR)
+        exit_button_surface = pygame.Surface((exit_button.get_size()[0] + 20, exit_button.get_size()[1] + 20))
+        exit_button_surface.fill(BUTTON_COLOR)
+        exit_button_rect = exit_button.get_rect(center=(WIDTH // 2, HEIGHT // 5 * 3))
+
+        exit_button_surface.blit(exit_button, (10, 10))
+        screen.blit(exit_button_surface, exit_button_rect)
+        screen.blit(win_surface, winner_rect)
+
+    else:
+        # Loser Screen setup
+        lose_rect = lose_surface.get_rect(center=(WIDTH // 2, HEIGHT // 5))
+        restart_button = font.render("RESTART", True, BUTTON_TEXT_COLOR)
+        restart_button_surface = pygame.Surface((restart_button.get_size()[0] + 20, restart_button.get_size()[1] + 20))
+        restart_button_surface.fill(BUTTON_COLOR)
+        restart_button_rect = restart_button.get_rect(center=(WIDTH // 2, HEIGHT // 5 * 3))
+
+        restart_button_surface.blit(restart_button, (10, 10))
+        screen.blit(restart_button_surface, restart_button_rect)
+        screen.blit(lose_surface, lose_rect)
+
+    pygame.display.update()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if restart_button_rect.collidepoint(event.pos):
+                    main()
+                if exit_button_rect.collidepoint(event.pos):
+                    pygame.quit()
+                    exit()
 
 
 def change_number(board, num, row, col):
