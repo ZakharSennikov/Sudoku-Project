@@ -122,7 +122,7 @@ def start_screen():
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if easy_button_rect.collidepoint(event.pos):
-                    return 1
+                    return 30
                 elif medium_button_rect.collidepoint(event.pos):
                     return 40
                 elif hard_button_rect.collidepoint(event.pos):
