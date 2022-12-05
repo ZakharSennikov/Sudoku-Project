@@ -72,7 +72,7 @@ def draw_board(board, original_board):
         for index, num in enumerate(row):
             if num != 0:
                 if num != original_board[row_count][index]:
-                    number = number_font.render(str(num), True, NUMBER_INPUT)
+                    number = number_font.render(str(num), True, NUMBER_INPUT_COLOR)
                     number_rect = number.get_rect(center=(25 + 50 * index, 30 + 50 * row_count))
                     screen.blit(number, number_rect)
                 else:
@@ -238,6 +238,8 @@ def main():
                 x, y = event.pos
                 row = y // 50
                 col = x // 50
+                if y > 449:
+                    y = 10000
                 if reset_button_rect.collidepoint(event.pos):
                     removed_board = original_board
                 elif restart_button_rect.collidepoint(event.pos):
