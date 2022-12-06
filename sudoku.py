@@ -17,6 +17,7 @@ background = pygame.transform.scale(background_img, (WIDTH, HEIGHT))
 font = pygame.font.Font(None, FONT_SIZE)
 title_font = pygame.font.Font(None, TITLE_SIZE)
 number_font = pygame.font.Font(None, NUMBER_SIZE)
+number_guess_font = pygame.font.Font(None, NUMBER_GUESS_SIZE)
 # text
 title_surface = title_font.render("Sudoku", True, TITLE_COLOR)
 win_surface = title_font.render("Game Won! :)", True, TITLE_COLOR)
@@ -25,11 +26,8 @@ button_background = pygame.Surface((BUTTON_WIDTH, BUTTON_HEIGHT))
 button_background.fill(BUTTON_COLOR)
 
 
-def draw_selected(row, col):
-    pygame.draw.rect(screen, SELECTED_SQUARE_COLOR, (row, col, SQUARE_SIZE, SQUARE_SIZE), LINE_WIDTH + 20)
-    pygame.display.update()
-
-
+# this function creates the grid
+# every third line is vertically and horizontally is drawn thicker
 def draw_grid():
     for line in range(10):
         if line % 3 == 0:
@@ -67,6 +65,8 @@ def draw_grid():
             )
 
 
+# this function prints the numbers in the sudoku board
+# if the number that is selected is not in the original board, it will be drawn in a gray color
 def draw_board(board, original_board):
     for row_count, row in enumerate(board):
         for index, num in enumerate(row):
@@ -81,25 +81,22 @@ def draw_board(board, original_board):
                     screen.blit(number, number_rect)
 
 
+# This function prints the numbers in a light pink color if they are in the guess board
 def draw_guess_board(board):
     for row_count, row in enumerate(board):
         for index, num in enumerate(row):
             if num != 0:
-                number = number_font.render(str(num), True, GUESS_COLOR)
-                number_rect = number.get_rect(center=(25 + 50 * index, 30 + 50 * row_count))
+                number = number_guess_font.render(str(num), True, GUESS_COLOR)
+                number_rect = number.get_rect(center=(12 + 50 * index, 15 + 50 * row_count))
                 screen.blit(number, number_rect)
 
 
-def draw_guess(num, row, col):
-    number_guess = number_font.render(str(num), True, GUESS_COLOR)
-    number_rect = number_guess.get_rect(center=(25 + 50 * col, 30 + 50 * row))
-    screen.blit(number_guess, number_rect)
-
-
+# creates an empty 9x9 board for the user guesses
 def generate_empty():
     return [[0 for i in range(9)] for i in range(9)]
 
 
+# this is the start screen
 def start_screen():
     while True:
         # title text
@@ -116,17 +113,19 @@ def start_screen():
         easy_text = font.render('EASY', True, BUTTON_TEXT_COLOR)
         medium_text = font.render('MEDIUM', True, BUTTON_TEXT_COLOR)
         hard_text = font.render('HARD', True, BUTTON_TEXT_COLOR)
+
+        # Event loop
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if easy_button_rect.collidepoint(event.pos):
-                    return 30
+                    return EASY
                 elif medium_button_rect.collidepoint(event.pos):
-                    return 40
+                    return MEDIUM
                 elif hard_button_rect.collidepoint(event.pos):
-                    return 50
+                    return HARD
 
         # display everything
         screen.blit(background, (0, 0))
@@ -140,39 +139,19 @@ def start_screen():
         pygame.display.update()
 
 
-def end_screen(answer_key_board, final_board):
+# this is the winner screen
+def loser_end_screen():
     screen.blit(background, (0, 0))
-    # creates before replacement
+    # Loser Screen setup
     lose_rect = lose_surface.get_rect(center=(WIDTH // 2, HEIGHT // 5))
     restart_button = font.render("RESTART", True, BUTTON_TEXT_COLOR)
     restart_button_surface = pygame.Surface((restart_button.get_size()[0] + 20, restart_button.get_size()[1] + 20))
     restart_button_surface.fill(BUTTON_COLOR)
-    restart_button_rect = restart_button.get_rect(center=(0, 0))
+    restart_button_rect = restart_button.get_rect(center=(WIDTH // 2, HEIGHT // 5 * 3))
 
-    if answer_key_board == final_board:
-        # winner Screen setup
-        winner_rect = win_surface.get_rect(center=(WIDTH // 2, HEIGHT // 5))
-        exit_button = font.render("EXIT", True, BUTTON_TEXT_COLOR)
-        exit_button_surface = pygame.Surface((exit_button.get_size()[0] + 20, exit_button.get_size()[1] + 20))
-        exit_button_surface.fill(BUTTON_COLOR)
-        exit_button_rect = exit_button.get_rect(center=(WIDTH // 2, HEIGHT // 5 * 3))
-
-        exit_button_surface.blit(exit_button, (10, 10))
-        screen.blit(exit_button_surface, exit_button_rect)
-        screen.blit(win_surface, winner_rect)
-
-    else:
-        # Loser Screen setup
-        lose_rect = lose_surface.get_rect(center=(WIDTH // 2, HEIGHT // 5))
-        restart_button = font.render("RESTART", True, BUTTON_TEXT_COLOR)
-        restart_button_surface = pygame.Surface((restart_button.get_size()[0] + 20, restart_button.get_size()[1] + 20))
-        restart_button_surface.fill(BUTTON_COLOR)
-        restart_button_rect = restart_button.get_rect(center=(WIDTH // 2, HEIGHT // 5 * 3))
-
-        restart_button_surface.blit(restart_button, (10, 10))
-        screen.blit(restart_button_surface, restart_button_rect)
-        screen.blit(lose_surface, lose_rect)
-
+    restart_button_surface.blit(restart_button, (10, 10))
+    screen.blit(restart_button_surface, restart_button_rect)
+    screen.blit(lose_surface, lose_rect)
     pygame.display.update()
     while True:
         for event in pygame.event.get():
@@ -182,21 +161,45 @@ def end_screen(answer_key_board, final_board):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if restart_button_rect.collidepoint(event.pos):
                     main()
+
+
+# This shows the loser end screen
+def winner_end_screen():
+    screen.blit(background, (0, 0))
+    # winner Screen setup
+    winner_rect = win_surface.get_rect(center=(WIDTH // 2, HEIGHT // 5))
+    exit_button = font.render("EXIT", True, BUTTON_TEXT_COLOR)
+    exit_button_surface = pygame.Surface((exit_button.get_size()[0] + 20, exit_button.get_size()[1] + 20))
+    exit_button_surface.fill(BUTTON_COLOR)
+    exit_button_rect = exit_button.get_rect(center=(WIDTH // 2, HEIGHT // 5 * 3))
+
+    exit_button_surface.blit(exit_button, (10, 10))
+    screen.blit(exit_button_surface, exit_button_rect)
+    screen.blit(win_surface, winner_rect)
+    # Event loop
+    pygame.display.update()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 if exit_button_rect.collidepoint(event.pos):
                     pygame.quit()
                     exit()
 
 
+# Allows the imported boards to have different numbers
 def change_number(board, num, row, col):
     board[row][col] = num
 
 
 def main():
-    num_removed = start_screen()
     # initialize board
     row = -2
     col = -2
-    original_board, board, removed_board = generate_sudoku(9, num_removed)
+    # Calls the start screen function to see how many squares to remove
+    original_board, board, removed_board = generate_sudoku(9, start_screen())
     guess_board = generate_empty()
     # set up the buttons
     reset_button = font.render("RESET", True, BUTTON_TEXT_COLOR)
@@ -205,17 +208,15 @@ def main():
     restart_button_rect = restart_button.get_rect(center=(WIDTH // 2, 500))
     exit_button = font.render("EXIT", True, BUTTON_TEXT_COLOR)
     exit_button_rect = exit_button.get_rect(center=(330, 500))
-    x = -100
-    y = -100
     num = 0
     while True:
         # selected square
         square_outline = pygame.Surface((SQUARE_SIZE, SQUARE_SIZE))
         square_outline.fill(SELECTED_SQUARE_COLOR)
-        square_outline_rect = square_outline.get_rect(center=(x//50 * 50 + 26, y//50 * 50 + 26))
+        square_outline_rect = square_outline.get_rect(center=(col * 50 + 26, row * 50 + 26))
         square_inside = pygame.Surface((SQUARE_SIZE - 8, SQUARE_SIZE - 8))
         square_inside.fill(BACKGROUND_COLOR)
-        square_inside_rect = square_inside.get_rect(center=(x//50 * 50 + 26, y//50 * 50 + 26))
+        square_inside_rect = square_inside.get_rect(center=(col * 50 + 26, row * 50 + 26))
         # display everything
         screen.blit(background_screen, (0, 0))
         screen.blit(button_background, reset_button_rect)
@@ -225,11 +226,15 @@ def main():
         screen.blit(button_background, exit_button_rect)
         screen.blit(exit_button, exit_button_rect)
         draw_grid()
-        screen.blit(square_outline, square_outline_rect)
-        screen.blit(square_inside, square_inside_rect)
+        # makes sure that the squares selected are not outside the grid
+        # also makes sure that the position can be altered
+        if row < 9 and original_board[row][col] == 0:
+            screen.blit(square_outline, square_outline_rect)
+            screen.blit(square_inside, square_inside_rect)
         draw_board(removed_board, original_board)
         draw_guess_board(guess_board)
         pygame.display.update()
+        # event loop
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -238,72 +243,71 @@ def main():
                 x, y = event.pos
                 row = y // 50
                 col = x // 50
-                if y > 449:
-                    y = 10000
                 if reset_button_rect.collidepoint(event.pos):
+                    # resets everything to be original
                     removed_board = original_board
+                    guess_board = generate_empty()
                 elif restart_button_rect.collidepoint(event.pos):
+                    # starts over the main function
                     main()
                 elif exit_button_rect.collidepoint(event.pos):
+                    # ends the game
                     pygame.quit()
                     exit()
-            if row > -1 and col > -1:
+            # if statement makes sure that the row and col are in range of the board
+            if (row > -1 and col > -1) and (row < 9 and col < 9):
                 if event.type == pygame.KEYDOWN:
                     if original_board[row][col] == 0:
                         if removed_board[row][col] == 0:
                             if num:
                                 change_number(guess_board, num, row, col)
                         if event.key == pygame.K_RETURN:
+                            # makes the return button change the values in the guess board and removed board
                             change_number(guess_board, 0, row, col)
                             change_number(removed_board, num, row, col)
                             num = 0
-                        if event.key == pygame.K_BACKSPACE:
+                        elif event.key == pygame.K_BACKSPACE:
+                            # erases the values
                             change_number(guess_board, 0, row, col)
                             change_number(removed_board, 0, row, col)
-                        if event.key == pygame.K_1:
+                        # has to go through each key to see if the user plugged a number in
+                        elif event.key == pygame.K_1:
                             num = 1
                             change_number(guess_board, num, row, col)
-                        if event.key == pygame.K_2:
+                        elif event.key == pygame.K_2:
                             num = 2
                             change_number(guess_board, num, row, col)
-                        if event.key == pygame.K_3:
+                        elif event.key == pygame.K_3:
                             num = 3
                             change_number(guess_board, num, row, col)
-                        if event.key == pygame.K_4:
+                        elif event.key == pygame.K_4:
                             num = 4
                             change_number(guess_board, num, row, col)
-                        if event.key == pygame.K_5:
+                        elif event.key == pygame.K_5:
                             num = 5
                             change_number(guess_board, num, row, col)
-                        if event.key == pygame.K_6:
+                        elif event.key == pygame.K_6:
                             num = 6
                             change_number(guess_board, num, row, col)
-                        if event.key == pygame.K_7:
+                        elif event.key == pygame.K_7:
                             num = 7
                             change_number(guess_board, num, row, col)
-                        if event.key == pygame.K_8:
+                        elif event.key == pygame.K_8:
                             num = 8
                             change_number(guess_board, num, row, col)
-                        if event.key == pygame.K_9:
+                        elif event.key == pygame.K_9:
                             num = 9
                             change_number(guess_board, num, row, col)
-                        '''
-                        if event.key == pygame.K_DOWN:
-                            row += 1
-                        if event.key == pygame.K_UP:
-                            row -= 1
-                        if event.key == pygame.K_LEFT:
-                            col -= 1
-                        if event.key == pygame.K_RIGHT:
-                            col += 1
-                        '''
-            end_game = True
+            # checks whether the game is over
             for line in removed_board:
-                for digit in line:
-                    if digit == 0:
-                        end_game = False
-            if end_game:
-                end_screen(board, removed_board)
+                if 0 in line:
+                    break
+            else:
+                # checks whether the player won or lost
+                if board == removed_board:
+                    winner_end_screen()
+                else:
+                    loser_end_screen()
 
 
 if __name__ == "__main__":
